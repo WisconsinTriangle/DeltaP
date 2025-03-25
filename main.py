@@ -25,14 +25,16 @@ ssl_context.verify_mode = ssl.CERT_NONE
 intents = discord.Intents.default()
 intents.message_content = True  # Enable message content intent
 bot = commands.Bot(command_prefix='!', intents=intents)
-bot.start_time = None
+bot.start_time: Optional[datetime] = None
 
 # Create aiohttp session with SSL context
-async def get_session():
+async def get_session() -> aiohttp.ClientSession:
     return aiohttp.ClientSession(connector=aiohttp.TCPConnector(ssl=ssl_context))
 
-bot.http._HTTPClient__session = None
-bot.http.get_session = get_session
+
+# Type ignore for internal discord.py attributes
+bot.http._HTTPClient__session = None  # type: ignore
+bot.http.get_session = get_session  # type: ignore
 
 @bot.event
 async def on_ready():
@@ -197,7 +199,7 @@ async def list_pending_points(interaction: discord.Interaction):
 
 @bot.tree.command(name="approve",
                   description="Approve points. Enter points like 4,3,6)")
-async def approve(interaction: discord.Interaction, point_id: str):
+async def approve(interaction: discord.Interaction, point_id: str) -> bool:
     """
     Approves specific points by their IDs. The points can either be a single ID or a
     comma-separated list of IDs. The command validates the user's role permissions
@@ -220,30 +222,29 @@ async def approve(interaction: discord.Interaction, point_id: str):
     """
     if await check_eboard_role(interaction) is False and await check_info_systems_role(interaction) is False:
         await interaction.response.send_message("You don't have permission to do that.")
-        return
+        return False
     # Reads in the points csv file
     try:
         df = read_csv(master_point_csv_name)
     except Exception as error:
         await interaction.response.send_message(f"There was an error: {str(error)}")
-        return
+        return False
     # If theres only one point id to approve
     if "," not in point_id:
         try:
-            point_id = int(point_id)
-            if point_id not in get_unapproved_points(df)["ID"].values.tolist():
+            point_id_int = int(point_id)
+            if point_id_int not in get_unapproved_points(df)["ID"].values.tolist():
                 await interaction.response.send_message("Error: This ID is not in the unapproved list")
-                return
-            df = change_point_approval(df, point_id, new_approval=True)
+                return False
+            df = change_point_approval(df, point_id_int, new_approval=True)
             df.to_csv(master_point_csv_name, index=False)
             await interaction.response.send_message(f"Point {point_id} approved")
             return True
         except Exception as error:
             await interaction.response.send_message(f"There was an error: {str(error)}")
+            return False
     # Splits the id string into a list of ints
-    ids = point_id.split(",")
-    for idx, ID in enumerate(ids):
-        ids[idx] = int(ID)
+    ids = [int(ID) for ID in point_id.split(",")]
     try:
         # Changes the points with the given ids
         df = change_approval_with_discrete_values(df, ids, new_approval=True)
@@ -252,6 +253,7 @@ async def approve(interaction: discord.Interaction, point_id: str):
         return True
     except Exception as error:
         await interaction.response.send_message(f"There was an error: {str(error)}")
+        return False
 
 
 @bot.tree.command(name="delete_unapproved_points", description="Delete all points that have not been approved.")

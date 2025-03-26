@@ -5,7 +5,7 @@ import ssl  # Secure connection support
 from datetime import datetime  # Date and time handling
 
 import aiohttp  # Add this import at the top with other imports
-import pytz  # Timezone support
+import pytz  # type: ignore  # Timezone support
 from discord.ext import commands  # Discord bot commands and scheduled tasks
 from dotenv import load_dotenv
 
@@ -25,12 +25,12 @@ ssl_context.verify_mode = ssl.CERT_NONE
 intents = discord.Intents.default()
 intents.message_content = True  # Enable message content intent
 bot = commands.Bot(command_prefix='!', intents=intents)
-bot.start_time: Optional[datetime] = None
+# Type ignore for dynamic attributes
+bot.start_time: Optional[datetime] = None  # type: ignore
 
 # Create aiohttp session with SSL context
 async def get_session() -> aiohttp.ClientSession:
     return aiohttp.ClientSession(connector=aiohttp.TCPConnector(ssl=ssl_context))
-
 
 # Type ignore for internal discord.py attributes
 bot.http._HTTPClient__session = None  # type: ignore

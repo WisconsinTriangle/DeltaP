@@ -17,8 +17,10 @@ async def check_eboard_role(interaction: discord.Interaction) -> bool:
     """
     if not interaction.guild:
         return False
+    # For type checking, treat the user as having roles attribute
+    user = interaction.user  # type: ignore
     vp_role = discord.utils.get(interaction.guild.roles, name="Executive Board")
-    if vp_role is None or vp_role not in interaction.user.roles:
+    if vp_role is None or vp_role not in user.roles:
         return False
     return True
 
@@ -39,8 +41,10 @@ async def check_brother_role(interaction: discord.Interaction) -> bool:
     """
     if not interaction.guild:
         return False
+    # For type checking, treat the user as having roles attribute
+    user = interaction.user  # type: ignore
     brother_role = discord.utils.get(interaction.guild.roles, name="Brother")
-    if brother_role is None or brother_role not in interaction.user.roles:
+    if brother_role is None or brother_role not in user.roles:
         return False
     return True
 
@@ -61,7 +65,9 @@ async def check_info_systems_role(interaction: discord.Interaction) -> bool:
     """
     if not interaction.guild:
         return False
+    # For type checking, treat the user as having roles attribute
+    user = interaction.user  # type: ignore
     infosys_role = discord.utils.get(interaction.guild.roles, name="Info Systems")
-    if infosys_role is None or infosys_role not in interaction.user.roles:
+    if infosys_role is None or infosys_role not in user.roles:
         return False
     return True

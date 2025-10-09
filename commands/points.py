@@ -80,9 +80,6 @@ def setup(bot: commands.Bot):
                                             f"Fetching Messages took {(end_time_1 - start_time_1):.2f} seconds.\n"
                                             f"Processing Messages took {(end_time_2 - start_time_2):.2f} seconds.\n"
                                             f"Eliminating Duplicates took {(end_time_3 - start_time_3):.2f} seconds.\n")
-            del end_time_1, end_time_2, end_time_3
-            del start_time_1, start_time_2, start_time_3
-
         except Exception as e:
             await interaction.followup.send(f"An error occurred: {str(e)}")
             raise

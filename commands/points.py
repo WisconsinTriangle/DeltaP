@@ -47,31 +47,41 @@ def setup(bot: commands.Bot):
         """
         from role.role_checking import check_brother_role
         if not await check_brother_role(interaction):
-            await interaction.response.send_message("You don't have permission to do that. Brother role required.", ephemeral=True)
+            await interaction.response.send_message("You don't have permission to do that. Brother role required.",
+                                                    ephemeral=True)
             return
         try:
             await interaction.response.send_message(f"Updating pledge points for {days_ago} days ago")
-
+            start_time_1 = time.time()
             # Fetch messages from Discord using config
             messages = await fetch_messages_from_days_ago(bot, config.points_channel_id, days_ago)
 
             if not messages:
                 await interaction.followup.send("No messages found for the specified time period.")
                 return
-
+            end_time_1 = time.time()
             # Process messages into PointEntry objects
+            start_time_2 = time.time()
             new_entries = await process_messages(messages)
+            end_time_2 = time.time()
 
+            start_time_3 = time.time()
             # Eliminate duplicates using the database manager
             unique_entries = eliminate_duplicates(new_entries, db_manager)
 
             if not unique_entries:
                 await interaction.followup.send("No new points to add to the database.")
                 return
-
+            end_time_3 = time.time()
             # Add new entries to the database
+
             count = db_manager.add_point_entries(unique_entries)
-            await interaction.followup.send(f"Successfully added {count} new points to the database.")
+            await interaction.followup.send(f"Successfully added {count} new points to the database. \n"
+                                            f"Fetching Messages took {end_time_1 - start_time_1} seconds.\n"
+                                            f"Processing Messages took {end_time_2 - start_time_2} seconds.\n"
+                                            f"Eliminating Duplicates took {end_time_3 - start_time_3} seconds.\n")
+            del end_time_1, end_time_2, end_time_3
+            del start_time_1, start_time_2, start_time_3
 
         except Exception as e:
             await interaction.followup.send(f"An error occurred: {str(e)}")

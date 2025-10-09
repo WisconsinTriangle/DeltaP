@@ -77,9 +77,9 @@ def setup(bot: commands.Bot):
 
             count = db_manager.add_point_entries(unique_entries)
             await interaction.followup.send(f"Successfully added {count} new points to the database. \n"
-                                            f"Fetching Messages took {end_time_1 - start_time_1} seconds.\n"
-                                            f"Processing Messages took {end_time_2 - start_time_2} seconds.\n"
-                                            f"Eliminating Duplicates took {end_time_3 - start_time_3} seconds.\n")
+                                            f"Fetching Messages took {(end_time_1 - start_time_1):.2f} seconds.\n"
+                                            f"Processing Messages took {(end_time_2 - start_time_2):.2f} seconds.\n"
+                                            f"Eliminating Duplicates took {(end_time_3 - start_time_3):.2f} seconds.\n")
             del end_time_1, end_time_2, end_time_3
             del start_time_1, start_time_2, start_time_3
 

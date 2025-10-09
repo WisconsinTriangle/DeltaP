@@ -1,20 +1,22 @@
 import os
-from datetime import datetime
+from datetime import time
 
 import discord
 from discord.ext import commands
-from config.settings import get_config
+
 from PledgePoints.messages import fetch_messages_from_days_ago, process_messages, eliminate_duplicates
 from PledgePoints.pledges import get_pledge_points, rank_pledges, plot_rankings
 from PledgePoints.sqlutils import DatabaseManager
+from config.settings import get_config
 from utils.discord_helpers import (
     send_chunked_message,
     format_point_entry_detailed,
     format_rankings_text,
     format_pending_points_list,
-    format_approval_confirmation,
-    format_approval_status
+    format_approval_confirmation
 )
+
+
 def setup(bot: commands.Bot):
     """
     Set up all pledge points-related slash commands for the bot.

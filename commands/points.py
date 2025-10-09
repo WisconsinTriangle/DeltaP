@@ -1,20 +1,22 @@
 import os
-from datetime import datetime
+from datetime import time
 
 import discord
 from discord.ext import commands
-from config.settings import get_config
+
 from PledgePoints.messages import fetch_messages_from_days_ago, process_messages, eliminate_duplicates
 from PledgePoints.pledges import get_pledge_points, rank_pledges, plot_rankings
 from PledgePoints.sqlutils import DatabaseManager
+from config.settings import get_config
 from utils.discord_helpers import (
     send_chunked_message,
     format_point_entry_detailed,
     format_rankings_text,
     format_pending_points_list,
-    format_approval_confirmation,
-    format_approval_status
+    format_approval_confirmation
 )
+
+
 def setup(bot: commands.Bot):
     """
     Set up all pledge points-related slash commands for the bot.
@@ -80,8 +82,6 @@ def setup(bot: commands.Bot):
                                             f"Fetching Messages took {end_time_1 - start_time_1} seconds.\n"
                                             f"Processing Messages took {end_time_2 - start_time_2} seconds.\n"
                                             f"Eliminating Duplicates took {end_time_3 - start_time_3} seconds.\n")
-            del end_time_1, end_time_2, end_time_3
-            del start_time_1, start_time_2, start_time_3
 
         except Exception as e:
             await interaction.followup.send(f"An error occurred: {str(e)}")

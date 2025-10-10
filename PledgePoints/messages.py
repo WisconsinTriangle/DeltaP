@@ -135,8 +135,10 @@ def eliminate_duplicates(
     Returns:
         List[PointEntry]: List of unique entries not already in the database
     """
-    # Get all existing points from the database
-    old_points = db_manager.get_all_points()
+    # Get all existing points from the database, regardless of approval status
+    # We only compare message content (time, points, pledge, brother, comment)
+    # and ignore approval-related fields (id, approval_status, approved_by, approval_timestamp)
+    old_points = db_manager.get_all_points(status_filter=None)
 
     # Convert old points to a set of string representations for faster lookup
     old_points_set = set()

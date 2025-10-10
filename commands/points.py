@@ -270,7 +270,7 @@ def setup(bot: commands.Bot):
         Reject pending point submissions.
 
         Allows E-Board members to reject point submissions by ID or reject all
-        pending points at once using 'all'. Rejected points will not count toward 
+        pending points at once using 'all'. Rejected points will not count toward
         pledge rankings.
 
         Args:

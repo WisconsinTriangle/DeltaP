@@ -350,3 +350,54 @@ class DatabaseManager:
             """, [rejector, current_time] + point_ids)
 
             return rejected_entries
+
+    def reject_all_pending(self, rejector: str) -> List[PointEntry]:
+        """
+        Reject all pending point entries.
+
+        Args:
+            rejector (str): Name of the person rejecting the points
+
+        Returns:
+            List[PointEntry]: List of all rejected point entries
+        """
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            current_time = datetime.now().isoformat()
+
+            # Get all pending entries
+            cursor.execute("""
+                           SELECT id,
+                                  Time,
+                                  PointChange,
+                                  Pledge,
+                                  Brother,
+                                  Comment,
+                                  approval_status,
+                                  approved_by,
+                                  approval_timestamp
+                           FROM Points
+                           WHERE approval_status = 'pending'
+                           """)
+
+            rows = cursor.fetchall()
+            rejected_entries = []
+            for row in rows:
+                try:
+                    rejected_entries.append(PointEntry.from_db_row(row))
+                except (ValueError, TypeError):
+                    continue
+
+            if not rejected_entries:
+                return []
+
+            # Update all pending to rejected
+            cursor.execute("""
+                           UPDATE Points
+                           SET approval_status    = 'rejected',
+                               approved_by        = ?,
+                               approval_timestamp = ?
+                           WHERE approval_status = 'pending'
+                           """, (rejector, current_time))
+
+            return rejected_entries

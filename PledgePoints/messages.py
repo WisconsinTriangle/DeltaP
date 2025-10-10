@@ -136,17 +136,22 @@ def eliminate_duplicates(
         List[PointEntry]: List of unique entries not already in the database
     """
     # Get all existing points from the database, regardless of approval status
-    # We only compare message content (time, points, pledge, brother, comment)
+    # We only compare message content (time, points, pledge, comment)
     # and ignore approval-related fields (id, approval_status, approved_by, approval_timestamp)
+    # NOTE: We also ignore the 'brother' field because Discord display names can change
     old_points = db_manager.get_all_points(status_filter=None)
 
     # Convert old points to a set of string representations for faster lookup
+    # NOTE: We exclude the 'brother' field from comparison because Discord display names
+    # can change over time, causing the same message to appear as a duplicate with a
+    # different brother name. The unique identifier should be the message itself
+    # (time + pledge + points + comment), not who recorded it.
     old_points_set = set()
     for point in old_points:
         # Convert datetime to ISO format string to preserve full precision
         time_str = point.time.isoformat()
-        # Create a tuple of the relevant fields as strings
-        point_key = (time_str, str(point.point_change), point.pledge, point.brother, point.comment)
+        # Create a tuple of the relevant fields as strings (excluding brother)
+        point_key = (time_str, str(point.point_change), point.pledge, point.comment)
         old_points_set.add(point_key)
 
     # Filter new entries
@@ -154,8 +159,8 @@ def eliminate_duplicates(
     for entry in new_entries:
         # Convert datetime to ISO format string in the same format
         time_str = entry.time.isoformat()
-        # Create a tuple of the relevant fields as strings
-        entry_key = (time_str, str(entry.point_change), entry.pledge, entry.brother, entry.comment)
+        # Create a tuple of the relevant fields as strings (excluding brother)
+        entry_key = (time_str, str(entry.point_change), entry.pledge, entry.comment)
 
         if entry_key not in old_points_set:
             unique_entries.append(entry)

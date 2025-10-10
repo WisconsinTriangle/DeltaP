@@ -125,8 +125,8 @@ def eliminate_duplicates(
     Eliminate duplicate point entries by comparing against existing database entries.
 
     Compares new entries against all existing entries (pending, approved, rejected)
-    to avoid duplicate insertions. Converts datetime to string for comparison
-    to avoid microsecond differences.
+    to avoid duplicate insertions. Uses ISO format for datetime comparison to
+    preserve full precision including microseconds and timezone information.
 
     Args:
         new_entries: List of new point entries to check for duplicates
@@ -143,8 +143,8 @@ def eliminate_duplicates(
     # Convert old points to a set of string representations for faster lookup
     old_points_set = set()
     for point in old_points:
-        # Convert datetime to string in a consistent format
-        time_str = point.time.strftime("%Y-%m-%d %H:%M:%S")
+        # Convert datetime to ISO format string to preserve full precision
+        time_str = point.time.isoformat()
         # Create a tuple of the relevant fields as strings
         point_key = (time_str, str(point.point_change), point.pledge, point.brother, point.comment)
         old_points_set.add(point_key)
@@ -152,8 +152,8 @@ def eliminate_duplicates(
     # Filter new entries
     unique_entries = []
     for entry in new_entries:
-        # Convert datetime to string in the same format
-        time_str = entry.time.strftime("%Y-%m-%d %H:%M:%S")
+        # Convert datetime to ISO format string in the same format
+        time_str = entry.time.isoformat()
         # Create a tuple of the relevant fields as strings
         entry_key = (time_str, str(entry.point_change), entry.pledge, entry.brother, entry.comment)
 

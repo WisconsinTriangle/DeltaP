@@ -1,5 +1,6 @@
 import os
 import time
+
 import discord
 from discord.ext import commands
 
@@ -263,46 +264,66 @@ def setup(bot: commands.Bot):
                 await interaction.followup.send(f"An error occurred while approving points: {error_message}")
             raise
 
-    @bot.tree.command(name="reject_points", description="Reject specific point submissions by ID")
+    @bot.tree.command(name="reject_points", description="Reject specific point submissions by ID or all pending points")
     async def reject_points(interaction: discord.Interaction, point_ids: str):
         """
         Reject pending point submissions.
 
-        Allows E-Board members to reject point submissions by ID. Rejected points
-        will not count toward pledge rankings.
+        Allows E-Board members to reject point submissions by ID or reject all
+        pending points at once using 'all'. Rejected points will not count toward 
+        pledge rankings.
 
         Args:
             interaction: Discord interaction from the slash command
-            point_ids: Comma-separated list of IDs to reject (e.g., "1,2,3")
+            point_ids: Comma-separated list of IDs to reject (e.g., "1,2,3") or "all" for all pending
         """
         try:
             # Check if user has Executive Board role
             from role.role_checking import check_eboard_role, check_info_systems_role
             if not (await check_eboard_role(interaction) or await check_info_systems_role(interaction)):
-                await interaction.response.send_message("You don't have permission to reject points. Executive Board role required.", ephemeral=True)
+                await interaction.response.send_message(
+                    "You don't have permission to reject points. Executive Board role required.", ephemeral=True)
                 return
 
             await interaction.response.send_message("Processing rejection...")
 
-            # Parse point IDs
-            try:
-                ids = [int(id.strip()) for id in point_ids.split(',')]
-            except ValueError:
-                await interaction.followup.send("Invalid point IDs. Please provide comma-separated numbers.")
-                return
-
-            # Reject points using database manager
+            reject_all = point_ids.strip().lower() == "all"
             rejector = interaction.user.display_name
-            rejected_entries = db_manager.reject_points(ids, rejector)
 
-            if not rejected_entries:
-                await interaction.followup.send("No pending points found with the provided IDs.")
-                return
+            if reject_all:
+                # Reject all pending points using database manager
+                rejected_entries = db_manager.reject_all_pending(rejector)
 
-            # Format response using utility function
-            rejected_text = format_approval_confirmation(rejected_entries, approved=False)
+                if not rejected_entries:
+                    await interaction.followup.send("No pending points found to reject.")
+                    return
 
-            await interaction.followup.send(rejected_text)
+                # Format response using utility function
+                rejected_text = format_approval_confirmation(rejected_entries, approved=False)
+                rejected_text = rejected_text.replace("Rejected", f"Rejected ALL ({len(rejected_entries)})")
+
+                # Send with automatic chunking if needed
+                await send_chunked_message(interaction, rejected_text)
+            else:
+                # Parse point IDs 
+                try:
+                    ids = [int(id.strip()) for id in point_ids.split(',')]
+                except ValueError:
+                    await interaction.followup.send(
+                        "Invalid point IDs. Please provide comma-separated numbers or 'all'.")
+                    return
+
+                # Reject points using database manager
+                rejected_entries = db_manager.reject_points(ids, rejector)
+
+                if not rejected_entries:
+                    await interaction.followup.send("No pending points found with the provided IDs.")
+                    return
+
+                # Format response using utility function
+                rejected_text = format_approval_confirmation(rejected_entries, approved=False)
+
+                await interaction.followup.send(rejected_text)
 
         except Exception as e:
             await interaction.followup.send(f"An error occurred while rejecting points: {str(e)}")

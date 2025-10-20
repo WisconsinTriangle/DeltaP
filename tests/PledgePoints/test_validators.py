@@ -52,12 +52,6 @@ class TestCalculateStudyHoursPoints:
         assert calculate_study_hours_points(10) == 5
         assert calculate_study_hours_points(100) == 5
 
-    def test_decimal_hours(self):
-        """Test decimal hours are converted to int."""
-        assert calculate_study_hours_points(1.5) == -1
-        assert calculate_study_hours_points(2.5) == 0
-        assert calculate_study_hours_points(3.9) == 1
-
     def test_negative_hours_treated_as_zero(self):
         """Test negative hours are treated as 0 hours."""
         assert calculate_study_hours_points(-1) == -2

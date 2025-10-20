@@ -78,7 +78,7 @@ def validate_pledge_name(name: str) -> Optional[str]:
     return None
 
 
-def calculate_study_hours_points(hours: float) -> int:
+def calculate_study_hours_points(hours: int) -> int:
     """
     Calculate points based on study room hours.
 
@@ -88,7 +88,7 @@ def calculate_study_hours_points(hours: float) -> int:
     - Over 2 hours: +1 point per hour up to max of 5 points
 
     Args:
-        hours: Number of hours studied (can be decimal)
+        hours: Number of hours studied (integer only)
 
     Returns:
         int: Points to award (can be negative)
@@ -110,13 +110,13 @@ def calculate_study_hours_points(hours: float) -> int:
     
     if hours < 2:
         # Below requirement: -2 points at 0 hours, -1 point at 1 hour
-        return int(hours) - 2
+        return hours - 2
     elif hours == 2:
         # Exactly meets requirement: 0 points
         return 0
     else:
         # Above requirement: +1 point per hour above 2, max 5 points
-        points = int(hours) - 2
+        points = hours - 2
         return min(points, 5)
 
 

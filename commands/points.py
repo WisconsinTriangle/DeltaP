@@ -369,7 +369,7 @@ def setup(bot: commands.Bot):
             raise
 
     @bot.tree.command(name="study_hours", description="Submit study room hours for a pledge")
-    async def study_hours(interaction: discord.Interaction, name: str, hours: float):
+    async def study_hours(interaction: discord.Interaction, name: str, hours: int):
         """
         Submit study room hours for a pledge and award/deduct points accordingly.
 
@@ -387,13 +387,8 @@ def setup(bot: commands.Bot):
         Args:
             interaction: Discord interaction from the slash command
             name: Name of the pledge
-            hours: Number of hours studied (can be decimal)
+            hours: Number of hours studied (integer only)
         """
-        from role.role_checking import check_brother_role
-        if not await check_brother_role(interaction):
-            await interaction.response.send_message("You don't have permission to do that. Brother role required.", ephemeral=True)
-            return
-        
         try:
             # Validate pledge name
             normalized_name = validate_pledge_name(name)

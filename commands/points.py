@@ -7,6 +7,8 @@ from discord.ext import commands
 from PledgePoints.messages import fetch_messages_from_days_ago, process_messages, eliminate_duplicates
 from PledgePoints.pledges import get_pledge_points, rank_pledges, plot_rankings
 from PledgePoints.sqlutils import DatabaseManager
+from PledgePoints.validators import validate_pledge_name, calculate_study_hours_points
+from PledgePoints.models import PointEntry
 from config.settings import get_config
 from utils.discord_helpers import (
     send_chunked_message,
@@ -15,6 +17,7 @@ from utils.discord_helpers import (
     format_pending_points_list,
     format_approval_confirmation
 )
+from datetime import datetime
 
 
 def setup(bot: commands.Bot):
@@ -363,4 +366,78 @@ def setup(bot: commands.Bot):
 
         except Exception as e:
             await interaction.followup.send(f"An error occurred while fetching point details: {str(e)}")
+            raise
+
+    @bot.tree.command(name="study_hours", description="Submit study room hours for a pledge")
+    async def study_hours(interaction: discord.Interaction, name: str, hours: float):
+        """
+        Submit study room hours for a pledge and award/deduct points accordingly.
+
+        Pledges are required to spend 2 hours every week in the study room.
+        Points are calculated as:
+        - 0 hours: -2 points
+        - 1 hour: -1 point
+        - 2 hours: 0 points
+        - 3 hours: 1 point
+        - 4 hours: 2 points
+        - 5 hours: 3 points
+        - 6 hours: 4 points
+        - 7+ hours: 5 points (max)
+
+        Args:
+            interaction: Discord interaction from the slash command
+            name: Name of the pledge
+            hours: Number of hours studied (can be decimal)
+        """
+        from role.role_checking import check_brother_role
+        if not await check_brother_role(interaction):
+            await interaction.response.send_message("You don't have permission to do that. Brother role required.", ephemeral=True)
+            return
+        
+        try:
+            # Validate pledge name
+            normalized_name = validate_pledge_name(name)
+            if normalized_name is None:
+                await interaction.response.send_message(
+                    f"Invalid pledge name: '{name}'. Please check the spelling and try again.",
+                    ephemeral=True
+                )
+                return
+            
+            # Validate hours (must be non-negative)
+            if hours < 0:
+                await interaction.response.send_message(
+                    "Hours cannot be negative. Please enter a valid number of hours.",
+                    ephemeral=True
+                )
+                return
+            
+            # Calculate points based on hours
+            points = calculate_study_hours_points(hours)
+            
+            # Create point entry
+            entry = PointEntry(
+                time=datetime.now(),
+                point_change=points,
+                pledge=normalized_name,
+                brother="Study",
+                comment=f"Study room hours: {hours}",
+                approval_status='pending'
+            )
+            
+            # Add to database
+            db_manager.add_point_entries([entry])
+            
+            # Create response message
+            point_sign = "+" if points >= 0 else ""
+            await interaction.response.send_message(
+                f"✅ Study hours submitted for **{normalized_name}**\n"
+                f"• Hours: {hours}\n"
+                f"• Points: {point_sign}{points}\n"
+                f"• Status: Pending approval\n"
+                f"• Brother: Study"
+            )
+            
+        except Exception as e:
+            await interaction.response.send_message(f"An error occurred while submitting study hours: {str(e)}")
             raise

@@ -6,8 +6,62 @@ from PledgePoints.validators import (
     parse_point_message,
     validate_pledge_name,
     validate_point_change,
+    calculate_study_hours_points,
 )
 from PledgePoints.constants import SQL_INT_MAX, SQL_INT_MIN
+
+
+class TestCalculateStudyHoursPoints:
+    """Tests for calculate_study_hours_points function."""
+
+    def test_zero_hours(self):
+        """Test 0 hours gives -2 points."""
+        assert calculate_study_hours_points(0) == -2
+
+    def test_one_hour(self):
+        """Test 1 hour gives -1 point."""
+        assert calculate_study_hours_points(1) == -1
+
+    def test_two_hours(self):
+        """Test 2 hours gives 0 points."""
+        assert calculate_study_hours_points(2) == 0
+
+    def test_three_hours(self):
+        """Test 3 hours gives 1 point."""
+        assert calculate_study_hours_points(3) == 1
+
+    def test_four_hours(self):
+        """Test 4 hours gives 2 points."""
+        assert calculate_study_hours_points(4) == 2
+
+    def test_five_hours(self):
+        """Test 5 hours gives 3 points."""
+        assert calculate_study_hours_points(5) == 3
+
+    def test_six_hours(self):
+        """Test 6 hours gives 4 points."""
+        assert calculate_study_hours_points(6) == 4
+
+    def test_seven_hours(self):
+        """Test 7 hours gives 5 points (max)."""
+        assert calculate_study_hours_points(7) == 5
+
+    def test_eight_hours_max_cap(self):
+        """Test 8+ hours still gives 5 points (max cap)."""
+        assert calculate_study_hours_points(8) == 5
+        assert calculate_study_hours_points(10) == 5
+        assert calculate_study_hours_points(100) == 5
+
+    def test_decimal_hours(self):
+        """Test decimal hours are converted to int."""
+        assert calculate_study_hours_points(1.5) == -1
+        assert calculate_study_hours_points(2.5) == 0
+        assert calculate_study_hours_points(3.9) == 1
+
+    def test_negative_hours_treated_as_zero(self):
+        """Test negative hours are treated as 0 hours."""
+        assert calculate_study_hours_points(-1) == -2
+        assert calculate_study_hours_points(-5) == -2
 
 
 class TestValidatePointChange:

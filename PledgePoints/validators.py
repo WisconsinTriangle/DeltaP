@@ -78,6 +78,48 @@ def validate_pledge_name(name: str) -> Optional[str]:
     return None
 
 
+def calculate_study_hours_points(hours: float) -> int:
+    """
+    Calculate points based on study room hours.
+
+    Pledges are required to spend two hours every week in the study room.
+    - Under 2 hours: negative points
+    - 2 hours: 0 points
+    - Over 2 hours: +1 point per hour up to max of 5 points
+
+    Args:
+        hours: Number of hours studied (can be decimal)
+
+    Returns:
+        int: Points to award (can be negative)
+
+    Examples:
+        >>> calculate_study_hours_points(0)
+        -2
+        >>> calculate_study_hours_points(1)
+        -1
+        >>> calculate_study_hours_points(2)
+        0
+        >>> calculate_study_hours_points(5)
+        3
+        >>> calculate_study_hours_points(10)
+        5
+    """
+    if hours < 0:
+        hours = 0
+    
+    if hours < 2:
+        # Below requirement: -2 points at 0 hours, -1 point at 1 hour
+        return int(hours) - 2
+    elif hours == 2:
+        # Exactly meets requirement: 0 points
+        return 0
+    else:
+        # Above requirement: +1 point per hour above 2, max 5 points
+        points = int(hours) - 2
+        return min(points, 5)
+
+
 def parse_point_message(content: str) -> Optional[Tuple[int, str, str]]:
     """
     Parse a point submission message into its components.

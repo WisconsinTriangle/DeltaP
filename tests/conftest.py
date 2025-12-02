@@ -1,4 +1,5 @@
 """Pytest configuration and fixtures for the test suite."""
+
 import os
 import sys
 from pathlib import Path
@@ -13,9 +14,9 @@ sys.path.insert(0, str(project_root))
 @pytest.fixture
 def sample_env_vars(monkeypatch):
     """Fixture to set up test environment variables."""
-    monkeypatch.setenv('DISCORD_TOKEN', 'test_token_123')
-    monkeypatch.setenv('CSV_NAME', 'test_pledge_points.db')
-    monkeypatch.setenv('CHANNEL_ID', '123456789')
+    monkeypatch.setenv("DISCORD_TOKEN", "test_token_123")
+    monkeypatch.setenv("CSV_NAME", "test_pledge_points.db")
+    monkeypatch.setenv("CHANNEL_ID", "123456789")
 
 
 @pytest.fixture

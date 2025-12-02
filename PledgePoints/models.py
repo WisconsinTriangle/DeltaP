@@ -32,13 +32,14 @@ class PointEntry:
         approved_by (Optional[str]): Name of person who approved/rejected
         approval_timestamp (Optional[datetime]): When the approval/rejection occurred
     """
+
     time: datetime
     point_change: int
     pledge: str
     brother: str
     comment: str
     entry_id: Optional[int] = None
-    approval_status: str = 'pending'
+    approval_status: str = "pending"
     approved_by: Optional[str] = None
     approval_timestamp: Optional[datetime] = None
 
@@ -52,7 +53,7 @@ class PointEntry:
         return (self.time, self.point_change, self.pledge, self.brother, self.comment)
 
     @classmethod
-    def from_db_row(cls, row: tuple) -> 'PointEntry':
+    def from_db_row(cls, row: tuple) -> "PointEntry":
         """
         Create a PointEntry from a database row.
 
@@ -64,8 +65,17 @@ class PointEntry:
         Returns:
             PointEntry: New PointEntry instance
         """
-        entry_id, time_str, point_change, pledge, brother, comment, \
-            approval_status, approved_by, approval_timestamp_str = row
+        (
+            entry_id,
+            time_str,
+            point_change,
+            pledge,
+            brother,
+            comment,
+            approval_status,
+            approved_by,
+            approval_timestamp_str,
+        ) = row
 
         # Convert time string to datetime
         if isinstance(time_str, datetime):
@@ -91,13 +101,13 @@ class PointEntry:
             brother=brother,
             comment=comment,
             entry_id=entry_id,
-            approval_status=approval_status or 'pending',
+            approval_status=approval_status or "pending",
             approved_by=approved_by,
-            approval_timestamp=approval_dt
+            approval_timestamp=approval_dt,
         )
 
     @classmethod
-    def from_simple_row(cls, row: tuple) -> 'PointEntry':
+    def from_simple_row(cls, row: tuple) -> "PointEntry":
         """
         Create a PointEntry from a simple database row (without approval fields).
 
@@ -120,5 +130,5 @@ class PointEntry:
             point_change=point_change,
             pledge=pledge,
             brother=brother,
-            comment=comment
+            comment=comment,
         )

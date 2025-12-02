@@ -95,7 +95,7 @@ class DatabaseManager:
             for column_def in [
                 "approval_status TEXT DEFAULT 'pending'",
                 "approved_by TEXT",
-                "approval_timestamp TEXT"
+                "approval_timestamp TEXT",
             ]:
                 try:
                     cursor.execute(f"ALTER TABLE Points ADD COLUMN {column_def}")
@@ -122,11 +122,13 @@ class DatabaseManager:
             cursor.executemany(
                 """INSERT INTO Points (Time, PointChange, Pledge, Brother, Comment, approval_status)
                    VALUES (?, ?, ?, ?, ?, 'pending')""",
-                values
+                values,
             )
             return len(entries)
 
-    def get_all_points(self, status_filter: Optional[List[str]] = None) -> List[PointEntry]:
+    def get_all_points(
+        self, status_filter: Optional[List[str]] = None
+    ) -> List[PointEntry]:
         """
         Retrieve point entries from the database.
 
@@ -143,7 +145,7 @@ class DatabaseManager:
 
             if status_filter:
                 # Build parameterized query with placeholders
-                placeholders = ','.join('?' for _ in status_filter)
+                placeholders = ",".join("?" for _ in status_filter)
                 query = f"""
                     SELECT id, Time, PointChange, Pledge, Brother, Comment,
                            approval_status, approved_by, approval_timestamp
@@ -177,7 +179,7 @@ class DatabaseManager:
         Returns:
             List[PointEntry]: List of approved point entries
         """
-        return self.get_all_points(status_filter=['approved'])
+        return self.get_all_points(status_filter=["approved"])
 
     def get_pending_points(self) -> List[PointEntry]:
         """
@@ -186,7 +188,7 @@ class DatabaseManager:
         Returns:
             List[PointEntry]: List of pending point entries
         """
-        return self.get_all_points(status_filter=['pending'])
+        return self.get_all_points(status_filter=["pending"])
 
     def get_point_by_id(self, point_id: int) -> Optional[PointEntry]:
         """
@@ -200,12 +202,15 @@ class DatabaseManager:
         """
         with self.get_connection() as conn:
             cursor = conn.cursor()
-            cursor.execute("""
+            cursor.execute(
+                """
                 SELECT id, Time, PointChange, Pledge, Brother, Comment,
                        approval_status, approved_by, approval_timestamp
                 FROM Points
                 WHERE id = ?
-            """, (point_id,))
+            """,
+                (point_id,),
+            )
 
             row = cursor.fetchone()
             if row:
@@ -234,13 +239,16 @@ class DatabaseManager:
             current_time = datetime.now().isoformat()
 
             # Get the entries that will be approved
-            placeholders = ','.join('?' for _ in point_ids)
-            cursor.execute(f"""
+            placeholders = ",".join("?" for _ in point_ids)
+            cursor.execute(
+                f"""
                 SELECT id, Time, PointChange, Pledge, Brother, Comment,
                        approval_status, approved_by, approval_timestamp
                 FROM Points
                 WHERE id IN ({placeholders}) AND approval_status = 'pending'
-            """, point_ids)
+            """,
+                point_ids,
+            )
 
             rows = cursor.fetchall()
             approved_entries = []
@@ -251,13 +259,16 @@ class DatabaseManager:
                     continue
 
             # Update approval status
-            cursor.execute(f"""
+            cursor.execute(
+                f"""
                 UPDATE Points
                 SET approval_status = 'approved',
                     approved_by = ?,
                     approval_timestamp = ?
                 WHERE id IN ({placeholders}) AND approval_status = 'pending'
-            """, [approver, current_time] + point_ids)
+            """,
+                [approver, current_time] + point_ids,
+            )
 
             return approved_entries
 
@@ -295,13 +306,16 @@ class DatabaseManager:
                 return []
 
             # Update all pending to approved
-            cursor.execute("""
+            cursor.execute(
+                """
                 UPDATE Points
                 SET approval_status = 'approved',
                     approved_by = ?,
                     approval_timestamp = ?
                 WHERE approval_status = 'pending'
-            """, (approver, current_time))
+            """,
+                (approver, current_time),
+            )
 
             return approved_entries
 
@@ -324,13 +338,16 @@ class DatabaseManager:
             current_time = datetime.now().isoformat()
 
             # Get the entries that will be rejected
-            placeholders = ','.join('?' for _ in point_ids)
-            cursor.execute(f"""
+            placeholders = ",".join("?" for _ in point_ids)
+            cursor.execute(
+                f"""
                 SELECT id, Time, PointChange, Pledge, Brother, Comment,
                        approval_status, approved_by, approval_timestamp
                 FROM Points
                 WHERE id IN ({placeholders}) AND approval_status = 'pending'
-            """, point_ids)
+            """,
+                point_ids,
+            )
 
             rows = cursor.fetchall()
             rejected_entries = []
@@ -341,13 +358,16 @@ class DatabaseManager:
                     continue
 
             # Update approval status
-            cursor.execute(f"""
+            cursor.execute(
+                f"""
                 UPDATE Points
                 SET approval_status = 'rejected',
                     approved_by = ?,
                     approval_timestamp = ?
                 WHERE id IN ({placeholders}) AND approval_status = 'pending'
-            """, [rejector, current_time] + point_ids)
+            """,
+                [rejector, current_time] + point_ids,
+            )
 
             return rejected_entries
 
@@ -392,12 +412,15 @@ class DatabaseManager:
                 return []
 
             # Update all pending to rejected
-            cursor.execute("""
+            cursor.execute(
+                """
                            UPDATE Points
                            SET approval_status    = 'rejected',
                                approved_by        = ?,
                                approval_timestamp = ?
                            WHERE approval_status = 'pending'
-                           """, (rejector, current_time))
+                           """,
+                (rejector, current_time),
+            )
 
             return rejected_entries

@@ -8,7 +8,9 @@ from role.role_checking import check_info_systems_role
 
 
 def setup(bot: commands.Bot):
-    @bot.tree.command(name="ping", description="Check if the bot is responsive and get its latency")
+    @bot.tree.command(
+        name="ping", description="Check if the bot is responsive and get its latency"
+    )
     async def ping(interaction: discord.Interaction):
         # Send initial response and get the timestamp
         await interaction.response.send_message("Calculating ping...")
@@ -20,11 +22,12 @@ def setup(bot: commands.Bot):
 
         # Create embed for better presentation
         embed: discord.Embed = discord.Embed(
-            title="🏓 Pong!",
-            color=discord.Color.green()
+            title="🏓 Pong!", color=discord.Color.green()
         )
 
-        embed.add_field(name="WebSocket Latency", value=f"{websocket_latency}ms", inline=True)
+        embed.add_field(
+            name="WebSocket Latency", value=f"{websocket_latency}ms", inline=True
+        )
         # Edit the original response with the embed
         await interaction.edit_original_response(content=None, embed=embed)
 
@@ -50,7 +53,9 @@ def setup(bot: commands.Bot):
         None
         """
         if await check_info_systems_role(interaction) is False:
-            await interaction.response.send_message("You don't have permission to do that.")
+            await interaction.response.send_message(
+                "You don't have permission to do that."
+            )
             return
         await interaction.response.send_message("Shutting down...")
         time.sleep(1)

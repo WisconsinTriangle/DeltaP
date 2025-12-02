@@ -28,13 +28,15 @@ def get_pledge_points(db_manager: DatabaseManager) -> DataFrame:
     # Convert PointEntry objects to DataFrame
     data = []
     for entry in approved_entries:
-        data.append({
-            'Time': entry.time,
-            'PointChange': entry.point_change,
-            'Pledge': entry.pledge,
-            'Brother': entry.brother,
-            'Comment': entry.comment
-        })
+        data.append(
+            {
+                "Time": entry.time,
+                "PointChange": entry.point_change,
+                "Pledge": entry.pledge,
+                "Brother": entry.brother,
+                "Comment": entry.comment,
+            }
+        )
 
     df = pd.DataFrame(data)
 
@@ -43,9 +45,10 @@ def get_pledge_points(db_manager: DatabaseManager) -> DataFrame:
         return df
 
     # Ensure Time is datetime and sort
-    df['Time'] = pd.to_datetime(df['Time'])
-    df = df.sort_values(by='Time', ascending=False)
+    df["Time"] = pd.to_datetime(df["Time"])
+    df = df.sort_values(by="Time", ascending=False)
     return df
+
 
 def rank_pledges(df: DataFrame) -> pd.Series:
     """
@@ -65,7 +68,8 @@ def rank_pledges(df: DataFrame) -> pd.Series:
         pd.Series: A Series indexed by pledge, with values representing the cumulative
         point changes sorted in descending order.
     """
-    return df.groupby('Pledge')['PointChange'].sum().sort_values(ascending=False)
+    return df.groupby("Pledge")["PointChange"].sum().sort_values(ascending=False)
+
 
 def plot_rankings(rankings: pd.Series) -> str:
     """
@@ -89,17 +93,17 @@ def plot_rankings(rankings: pd.Series) -> str:
     sns.set_theme(style="whitegrid")
     # Convert to DataFrame to ensure order is preserved and explicit
     df = rankings.reset_index()
-    df.columns = ['Pledge', 'TotalPoints']
+    df.columns = ["Pledge", "TotalPoints"]
     # Sort explicitly in descending order
-    df = df.sort_values('TotalPoints', ascending=False, ignore_index=True)
+    df = df.sort_values("TotalPoints", ascending=False, ignore_index=True)
     # Use categorical ordering to ensure correct plotting order
-    df['Pledge'] = pd.Categorical(df['Pledge'], categories=df['Pledge'], ordered=True)
+    df["Pledge"] = pd.Categorical(df["Pledge"], categories=df["Pledge"], ordered=True)
     plt.figure(figsize=(max(6, len(df) * 0.7), 6))
-    sns.barplot(x='Pledge', y='TotalPoints', data=df, order=df['Pledge'])
+    sns.barplot(x="Pledge", y="TotalPoints", data=df, order=df["Pledge"])
     plt.title("Pledge Rankings by Total Points")
     plt.xlabel("Pledge")
     plt.ylabel("Total Points")
-    plt.xticks(rotation=45, ha='right', fontsize=10)
+    plt.xticks(rotation=45, ha="right", fontsize=10)
     plt.tight_layout()
     plt.savefig("rankings.png")
     plt.close()

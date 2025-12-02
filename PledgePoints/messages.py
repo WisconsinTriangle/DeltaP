@@ -5,7 +5,11 @@ from typing import List, Tuple
 import discord
 import pytz
 
-from PledgePoints.constants import EMOJI_FAILURE, EMOJI_SUCCESS, REACTION_RATE_LIMIT_SECONDS
+from PledgePoints.constants import (
+    EMOJI_FAILURE,
+    EMOJI_SUCCESS,
+    REACTION_RATE_LIMIT_SECONDS,
+)
 from PledgePoints.models import PointEntry
 from PledgePoints.sqlutils import DatabaseManager
 from PledgePoints.validators import parse_point_message
@@ -44,8 +48,9 @@ async def fetch_messages_from_days_ago(
     return messages
 
 
-async def add_reactions_with_rate_limit(messages: List[Tuple[discord.Message, bool]],
-    rate_limit: float = REACTION_RATE_LIMIT_SECONDS
+async def add_reactions_with_rate_limit(
+    messages: List[Tuple[discord.Message, bool]],
+    rate_limit: float = REACTION_RATE_LIMIT_SECONDS,
 ):
     """
     Add reactions to messages with rate limiting.
@@ -103,7 +108,7 @@ async def process_messages(
             point_change=point_change,
             pledge=pledge,
             brother=author.display_name,
-            comment=comment
+            comment=comment,
         )
         processed_entries.append(entry)
         reaction_queue.append((message, True))

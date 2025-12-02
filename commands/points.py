@@ -5,7 +5,11 @@ import discord
 from discord.ext import commands
 
 from PledgePoints.constants import VALID_PLEDGES
-from PledgePoints.messages import fetch_messages_from_days_ago, process_messages, eliminate_duplicates
+from PledgePoints.messages import (
+    fetch_messages_from_days_ago,
+    process_messages,
+    eliminate_duplicates,
+)
 from PledgePoints.pledges import get_pledge_points, rank_pledges, plot_rankings
 from PledgePoints.sqlutils import DatabaseManager
 from config.settings import get_config
@@ -14,7 +18,7 @@ from utils.discord_helpers import (
     format_point_entry_detailed,
     format_rankings_text,
     format_pending_points_list,
-    format_approval_confirmation
+    format_approval_confirmation,
 )
 
 
@@ -35,7 +39,9 @@ def setup(bot: commands.Bot):
     # Initialize the database manager
     db_manager = DatabaseManager(config.database_path)
 
-    @bot.tree.command(name="update_pledge_points", description="Update the point Database.")
+    @bot.tree.command(
+        name="update_pledge_points", description="Update the point Database."
+    )
     async def update_pledge_points(interaction: discord.Interaction, days_ago: int):
         """
         Fetch and process messages from the points channel to update the database.
@@ -49,18 +55,27 @@ def setup(bot: commands.Bot):
             days_ago: Number of days in the past to fetch messages from
         """
         from role.role_checking import check_brother_role
+
         if not await check_brother_role(interaction):
-            await interaction.response.send_message("You don't have permission to do that. Brother role required.",
-                                                    ephemeral=True)
+            await interaction.response.send_message(
+                "You don't have permission to do that. Brother role required.",
+                ephemeral=True,
+            )
             return
         try:
-            await interaction.response.send_message(f"Updating pledge points for {days_ago} days ago")
+            await interaction.response.send_message(
+                f"Updating pledge points for {days_ago} days ago"
+            )
             start_time_1 = time.time()
             # Fetch messages from Discord using config
-            messages = await fetch_messages_from_days_ago(bot, config.points_channel_id, days_ago)
+            messages = await fetch_messages_from_days_ago(
+                bot, config.points_channel_id, days_ago
+            )
 
             if not messages:
-                await interaction.followup.send("No messages found for the specified time period.")
+                await interaction.followup.send(
+                    "No messages found for the specified time period."
+                )
                 return
             end_time_1 = time.time()
             # Process messages into PointEntry objects
@@ -79,16 +94,20 @@ def setup(bot: commands.Bot):
             # Add new entries to the database
 
             count = db_manager.add_point_entries(unique_entries)
-            await interaction.followup.send(f"Successfully added {count} new points to the database. \n"
-                                            f"Fetching Messages took {(end_time_1 - start_time_1):.2f} seconds.\n"
-                                            f"Processing Messages took {(end_time_2 - start_time_2):.2f} seconds.\n"
-                                            f"Eliminating Duplicates took {(end_time_3 - start_time_3):.2f} seconds.\n")
+            await interaction.followup.send(
+                f"Successfully added {count} new points to the database. \n"
+                f"Fetching Messages took {(end_time_1 - start_time_1):.2f} seconds.\n"
+                f"Processing Messages took {(end_time_2 - start_time_2):.2f} seconds.\n"
+                f"Eliminating Duplicates took {(end_time_3 - start_time_3):.2f} seconds.\n"
+            )
         except Exception as e:
             await interaction.followup.send(f"An error occurred: {str(e)}")
             raise
 
-
-    @bot.tree.command(name="pledge_rankings", description="Show rankings of all pledges by total points.")
+    @bot.tree.command(
+        name="pledge_rankings",
+        description="Show rankings of all pledges by total points.",
+    )
     async def pledge_rankings(interaction: discord.Interaction):
         """
         Display a leaderboard of all pledges ranked by total approved points.
@@ -100,8 +119,12 @@ def setup(bot: commands.Bot):
             interaction: Discord interaction from the slash command
         """
         from role.role_checking import check_brother_role
+
         if not await check_brother_role(interaction):
-            await interaction.response.send_message("You don't have permission to do that. Brother role required.", ephemeral=True)
+            await interaction.response.send_message(
+                "You don't have permission to do that. Brother role required.",
+                ephemeral=True,
+            )
             return
         try:
             await interaction.response.send_message("Fetching pledge rankings...")
@@ -113,7 +136,10 @@ def setup(bot: commands.Bot):
             # Filter to only include current pledges from VALID_PLEDGES
             rankings_df = rankings_df[rankings_df.index.isin(VALID_PLEDGES)]
 
-            rankings = [(pledge, int(total_points)) for pledge, total_points in rankings_df.items()]
+            rankings = [
+                (pledge, int(total_points))
+                for pledge, total_points in rankings_df.items()
+            ]
 
             if not rankings:
                 await interaction.followup.send("No pledge data found in the database.")
@@ -125,10 +151,15 @@ def setup(bot: commands.Bot):
             # Send with automatic chunking if needed
             await send_chunked_message(interaction, ranking_text)
         except Exception as e:
-            await interaction.followup.send(f"An error occurred while fetching rankings: {str(e)}")
+            await interaction.followup.send(
+                f"An error occurred while fetching rankings: {str(e)}"
+            )
             raise
 
-    @bot.tree.command(name="plot_rankings", description="Plot rankings of all pledges by total points.")
+    @bot.tree.command(
+        name="plot_rankings",
+        description="Plot rankings of all pledges by total points.",
+    )
     async def plot_rankings_command(interaction: discord.Interaction):
         """
         Generate and display a bar chart of pledge rankings.
@@ -140,11 +171,17 @@ def setup(bot: commands.Bot):
             interaction: Discord interaction from the slash command
         """
         from role.role_checking import check_brother_role
+
         if not await check_brother_role(interaction):
-            await interaction.response.send_message("You don't have permission to do that. Brother role required.", ephemeral=True)
+            await interaction.response.send_message(
+                "You don't have permission to do that. Brother role required.",
+                ephemeral=True,
+            )
             return
         try:
-            await interaction.response.send_message("Generating pledge rankings plot...")
+            await interaction.response.send_message(
+                "Generating pledge rankings plot..."
+            )
 
             # Get pledge points and rankings using database manager
             points = get_pledge_points(db_manager)
@@ -166,10 +203,15 @@ def setup(bot: commands.Bot):
                 os.remove(plot_file)
 
         except Exception as e:
-            await interaction.followup.send(f"An error occurred while generating the plot: {str(e)}")
+            await interaction.followup.send(
+                f"An error occurred while generating the plot: {str(e)}"
+            )
             raise
 
-    @bot.tree.command(name="view_pending_points", description="View all pending point submissions that need approval")
+    @bot.tree.command(
+        name="view_pending_points",
+        description="View all pending point submissions that need approval",
+    )
     async def view_pending_points(interaction: discord.Interaction):
         """
         Display all point submissions awaiting approval.
@@ -181,8 +223,12 @@ def setup(bot: commands.Bot):
             interaction: Discord interaction from the slash command
         """
         from role.role_checking import check_brother_role
+
         if not await check_brother_role(interaction):
-            await interaction.response.send_message("You don't have permission to do that. Brother role required.", ephemeral=True)
+            await interaction.response.send_message(
+                "You don't have permission to do that. Brother role required.",
+                ephemeral=True,
+            )
             return
         try:
             await interaction.response.send_message("Fetching pending points...")
@@ -201,10 +247,15 @@ def setup(bot: commands.Bot):
             await send_chunked_message(interaction, pending_text)
 
         except Exception as e:
-            await interaction.followup.send(f"An error occurred while fetching pending points: {str(e)}")
+            await interaction.followup.send(
+                f"An error occurred while fetching pending points: {str(e)}"
+            )
             raise
 
-    @bot.tree.command(name="approve_points", description="Approve specific point submissions by ID or all pending points")
+    @bot.tree.command(
+        name="approve_points",
+        description="Approve specific point submissions by ID or all pending points",
+    )
     async def approve_points(interaction: discord.Interaction, point_ids: str):
         """
         Approve pending point submissions.
@@ -219,8 +270,15 @@ def setup(bot: commands.Bot):
         try:
             # Check if user has Executive Board role
             from role.role_checking import check_eboard_role, check_info_systems_role
-            if not (await check_eboard_role(interaction) or await check_info_systems_role(interaction)):
-                await interaction.response.send_message("You don't have permission to approve points. Executive Board role required.", ephemeral=True)
+
+            if not (
+                await check_eboard_role(interaction)
+                or await check_info_systems_role(interaction)
+            ):
+                await interaction.response.send_message(
+                    "You don't have permission to approve points. Executive Board role required.",
+                    ephemeral=True,
+                )
                 return
 
             await interaction.response.send_message("Processing approval...")
@@ -233,32 +291,44 @@ def setup(bot: commands.Bot):
                 approved_entries = db_manager.approve_all_pending(approver)
 
                 if not approved_entries:
-                    await interaction.followup.send("No pending points found to approve.")
+                    await interaction.followup.send(
+                        "No pending points found to approve."
+                    )
                     return
 
                 # Format response using utility function
-                approved_text = format_approval_confirmation(approved_entries, approved=True)
-                approved_text = approved_text.replace("Approved", f"Approved ALL ({len(approved_entries)})")
+                approved_text = format_approval_confirmation(
+                    approved_entries, approved=True
+                )
+                approved_text = approved_text.replace(
+                    "Approved", f"Approved ALL ({len(approved_entries)})"
+                )
 
                 # Send with automatic chunking if needed
                 await send_chunked_message(interaction, approved_text)
             else:
                 # Parse point IDs
                 try:
-                    ids = [int(id.strip()) for id in point_ids.split(',')]
+                    ids = [int(id.strip()) for id in point_ids.split(",")]
                 except ValueError:
-                    await interaction.followup.send("Invalid point IDs. Please provide comma-separated numbers or 'all'.")
+                    await interaction.followup.send(
+                        "Invalid point IDs. Please provide comma-separated numbers or 'all'."
+                    )
                     return
 
                 # Approve specific points using database manager
                 approved_entries = db_manager.approve_points(ids, approver)
 
                 if not approved_entries:
-                    await interaction.followup.send("No pending points found with the provided IDs.")
+                    await interaction.followup.send(
+                        "No pending points found with the provided IDs."
+                    )
                     return
 
                 # Format response using utility function
-                approved_text = format_approval_confirmation(approved_entries, approved=True)
+                approved_text = format_approval_confirmation(
+                    approved_entries, approved=True
+                )
 
                 # Send with automatic chunking if needed
                 await send_chunked_message(interaction, approved_text)
@@ -266,13 +336,23 @@ def setup(bot: commands.Bot):
         except Exception as e:
             # If the error is due to message length, send a more helpful message
             error_message = str(e)
-            if "Must be 2000 or fewer in length" in error_message or "Invalid Form Body" in error_message:
-                await interaction.followup.send("The approval message was too long to send. Please approve fewer points at a time or contact an admin.")
+            if (
+                "Must be 2000 or fewer in length" in error_message
+                or "Invalid Form Body" in error_message
+            ):
+                await interaction.followup.send(
+                    "The approval message was too long to send. Please approve fewer points at a time or contact an admin."
+                )
             else:
-                await interaction.followup.send(f"An error occurred while approving points: {error_message}")
+                await interaction.followup.send(
+                    f"An error occurred while approving points: {error_message}"
+                )
             raise
 
-    @bot.tree.command(name="reject_points", description="Reject specific point submissions by ID or all pending points")
+    @bot.tree.command(
+        name="reject_points",
+        description="Reject specific point submissions by ID or all pending points",
+    )
     async def reject_points(interaction: discord.Interaction, point_ids: str):
         """
         Reject pending point submissions.
@@ -288,9 +368,15 @@ def setup(bot: commands.Bot):
         try:
             # Check if user has Executive Board role
             from role.role_checking import check_eboard_role, check_info_systems_role
-            if not (await check_eboard_role(interaction) or await check_info_systems_role(interaction)):
+
+            if not (
+                await check_eboard_role(interaction)
+                or await check_info_systems_role(interaction)
+            ):
                 await interaction.response.send_message(
-                    "You don't have permission to reject points. Executive Board role required.", ephemeral=True)
+                    "You don't have permission to reject points. Executive Board role required.",
+                    ephemeral=True,
+                )
                 return
 
             await interaction.response.send_message("Processing rejection...")
@@ -303,41 +389,57 @@ def setup(bot: commands.Bot):
                 rejected_entries = db_manager.reject_all_pending(rejector)
 
                 if not rejected_entries:
-                    await interaction.followup.send("No pending points found to reject.")
+                    await interaction.followup.send(
+                        "No pending points found to reject."
+                    )
                     return
 
                 # Format response using utility function
-                rejected_text = format_approval_confirmation(rejected_entries, approved=False)
-                rejected_text = rejected_text.replace("Rejected", f"Rejected ALL ({len(rejected_entries)})")
+                rejected_text = format_approval_confirmation(
+                    rejected_entries, approved=False
+                )
+                rejected_text = rejected_text.replace(
+                    "Rejected", f"Rejected ALL ({len(rejected_entries)})"
+                )
 
                 # Send with automatic chunking if needed
                 await send_chunked_message(interaction, rejected_text)
             else:
-                # Parse point IDs 
+                # Parse point IDs
                 try:
-                    ids = [int(id.strip()) for id in point_ids.split(',')]
+                    ids = [int(id.strip()) for id in point_ids.split(",")]
                 except ValueError:
                     await interaction.followup.send(
-                        "Invalid point IDs. Please provide comma-separated numbers or 'all'.")
+                        "Invalid point IDs. Please provide comma-separated numbers or 'all'."
+                    )
                     return
 
                 # Reject points using database manager
                 rejected_entries = db_manager.reject_points(ids, rejector)
 
                 if not rejected_entries:
-                    await interaction.followup.send("No pending points found with the provided IDs.")
+                    await interaction.followup.send(
+                        "No pending points found with the provided IDs."
+                    )
                     return
 
                 # Format response using utility function
-                rejected_text = format_approval_confirmation(rejected_entries, approved=False)
+                rejected_text = format_approval_confirmation(
+                    rejected_entries, approved=False
+                )
 
                 await interaction.followup.send(rejected_text)
 
         except Exception as e:
-            await interaction.followup.send(f"An error occurred while rejecting points: {str(e)}")
+            await interaction.followup.send(
+                f"An error occurred while rejecting points: {str(e)}"
+            )
             raise
 
-    @bot.tree.command(name="view_point_details", description="View detailed information about a specific point entry")
+    @bot.tree.command(
+        name="view_point_details",
+        description="View detailed information about a specific point entry",
+    )
     async def view_point_details(interaction: discord.Interaction, point_id: int):
         """
         Display detailed information about a specific point entry.
@@ -350,8 +452,12 @@ def setup(bot: commands.Bot):
             point_id: Database ID of the point entry to view
         """
         from role.role_checking import check_brother_role
+
         if not await check_brother_role(interaction):
-            await interaction.response.send_message("You don't have permission to do that. Brother role required.", ephemeral=True)
+            await interaction.response.send_message(
+                "You don't have permission to do that. Brother role required.",
+                ephemeral=True,
+            )
             return
         try:
             await interaction.response.send_message("Fetching point details...")
@@ -360,7 +466,9 @@ def setup(bot: commands.Bot):
             entry = db_manager.get_point_by_id(point_id)
 
             if not entry:
-                await interaction.followup.send(f"No point entry found with ID {point_id}.")
+                await interaction.followup.send(
+                    f"No point entry found with ID {point_id}."
+                )
                 return
 
             # Format detailed entry using utility function
@@ -370,5 +478,7 @@ def setup(bot: commands.Bot):
             await interaction.followup.send(details_text)
 
         except Exception as e:
-            await interaction.followup.send(f"An error occurred while fetching point details: {str(e)}")
+            await interaction.followup.send(
+                f"An error occurred while fetching point details: {str(e)}"
+            )
             raise

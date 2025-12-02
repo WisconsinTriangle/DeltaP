@@ -15,7 +15,9 @@ async def check_eboard_role(interaction: discord.Interaction) -> bool:
         an ephemeral message to the user and returns ``False``.
     :rtype: bool
     """
-    vp_role: discord.role = discord.utils.get(interaction.guild.roles, name="Executive Board")
+    vp_role: discord.role = discord.utils.get(
+        interaction.guild.roles, name="Executive Board"
+    )
     if vp_role is None or vp_role not in interaction.user.roles:
         return False
     return True
@@ -35,7 +37,9 @@ async def check_brother_role(interaction: discord.Interaction) -> bool:
         an ephemeral message to the user and returns ``False``.
     :rtype: bool
     """
-    brother_role: discord.role = discord.utils.get(interaction.guild.roles, name="Brother")
+    brother_role: discord.role = discord.utils.get(
+        interaction.guild.roles, name="Brother"
+    )
     if brother_role is None or brother_role not in interaction.user.roles:
         return False
     return True
@@ -55,7 +59,9 @@ async def check_info_systems_role(interaction: discord.Interaction) -> bool:
     :return: True if the user has the "Info Systems" role and the role exists within the guild; False otherwise.
     :rtype: bool
     """
-    infosys_role: discord.role = discord.utils.get(interaction.guild.roles, id=1032306248235888762)
+    infosys_role: discord.role = discord.utils.get(
+        interaction.guild.roles, id=1032306248235888762
+    )
     if infosys_role is None or infosys_role not in interaction.user.roles:
         return False
     return True

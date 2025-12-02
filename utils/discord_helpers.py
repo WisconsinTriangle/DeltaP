@@ -19,7 +19,7 @@ from PledgePoints.models import PointEntry
 async def send_chunked_message(
     interaction: discord.Interaction,
     text: str,
-    chunk_size: int = DISCORD_MESSAGE_SAFE_LENGTH
+    chunk_size: int = DISCORD_MESSAGE_SAFE_LENGTH,
 ) -> None:
     """
     Send a long message by splitting it into chunks if necessary.
@@ -36,7 +36,7 @@ async def send_chunked_message(
         await interaction.followup.send(text)
     else:
         # Split into chunks
-        chunks = [text[i:i+chunk_size] for i in range(0, len(text), chunk_size)]
+        chunks = [text[i : i + chunk_size] for i in range(0, len(text), chunk_size)]
         for chunk in chunks:
             await interaction.followup.send(chunk)
 
@@ -54,12 +54,12 @@ def format_approval_status(entry: PointEntry) -> str:
     Returns:
         str: Formatted approval status string with emoji
     """
-    if entry.approval_status == 'approved':
+    if entry.approval_status == "approved":
         status = f"✅ **Approved** by {entry.approved_by}"
         if entry.approval_timestamp:
             status += f" on {entry.approval_timestamp.strftime('%Y-%m-%d %H:%M:%S')}"
         return status
-    elif entry.approval_status == 'rejected':
+    elif entry.approval_status == "rejected":
         status = f"❌ **Rejected** by {entry.approved_by}"
         if entry.approval_timestamp:
             status += f" on {entry.approval_timestamp.strftime('%Y-%m-%d %H:%M:%S')}"
@@ -94,7 +94,7 @@ def format_point_entry_detailed(entry: PointEntry) -> str:
     Returns:
         str: Multi-line formatted string with all entry details
     """
-    time_formatted = entry.time.strftime('%Y-%m-%d %H:%M:%S')
+    time_formatted = entry.time.strftime("%Y-%m-%d %H:%M:%S")
     approval_info = format_approval_status(entry)
 
     details = f"**ID: {entry.entry_id}**\n"
@@ -152,7 +152,9 @@ def format_pending_points_list(entries: List[PointEntry]) -> str:
     return text
 
 
-def format_approval_confirmation(entries: List[PointEntry], approved: bool = True) -> str:
+def format_approval_confirmation(
+    entries: List[PointEntry], approved: bool = True
+) -> str:
     """
     Format a confirmation message for approved or rejected points.
 

@@ -122,7 +122,7 @@ def parse_point_message(content: str) -> Optional[Tuple[int, str, str]]:
         return None
 
     # Extract remaining content after the point value
-    remaining_content = content[len(point_match.group(1)):].strip()
+    remaining_content = content[len(point_match.group(1)) :].strip()
 
     # Split into pledge name and comment
     parts = remaining_content.split(" ", 1)

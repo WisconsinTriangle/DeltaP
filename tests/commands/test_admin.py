@@ -1,4 +1,5 @@
 """Unit tests for admin commands."""
+
 import pytest
 from unittest.mock import AsyncMock, Mock, patch
 
@@ -17,8 +18,9 @@ class TestAdminCommandSetup:
 
         def mock_command(*args, **kwargs):
             def decorator(func):
-                commands_registered.append((kwargs.get('name'), func))
+                commands_registered.append((kwargs.get("name"), func))
                 return func
+
             return decorator
 
         mock_bot.tree.command = mock_command
@@ -28,7 +30,7 @@ class TestAdminCommandSetup:
 
         # Check ping command was registered
         command_names = [name for name, _ in commands_registered]
-        assert 'ping' in command_names
+        assert "ping" in command_names
 
     @pytest.mark.asyncio
     async def test_shutdown_command_exists(self):
@@ -39,8 +41,9 @@ class TestAdminCommandSetup:
 
         def mock_command(*args, **kwargs):
             def decorator(func):
-                commands_registered.append((kwargs.get('name'), func))
+                commands_registered.append((kwargs.get("name"), func))
                 return func
+
             return decorator
 
         mock_bot.tree.command = mock_command
@@ -50,7 +53,7 @@ class TestAdminCommandSetup:
 
         # Check shutdown command was registered
         command_names = [name for name, _ in commands_registered]
-        assert 'shutdown' in command_names
+        assert "shutdown" in command_names
 
 
 class TestShutdownPermissions:
@@ -67,9 +70,10 @@ class TestShutdownPermissions:
         def mock_command(*args, **kwargs):
             def decorator(func):
                 nonlocal shutdown_func
-                if kwargs.get('name') == 'shutdown':
+                if kwargs.get("name") == "shutdown":
                     shutdown_func = func
                 return func
+
             return decorator
 
         mock_bot.tree.command = mock_command
@@ -81,7 +85,9 @@ class TestShutdownPermissions:
         mock_interaction.response.send_message = AsyncMock()
 
         # Test with check_info_systems_role returning False
-        with patch('commands.admin.check_info_systems_role', new_callable=AsyncMock) as mock_role_check:
+        with patch(
+            "commands.admin.check_info_systems_role", new_callable=AsyncMock
+        ) as mock_role_check:
             mock_role_check.return_value = False
 
             if shutdown_func:

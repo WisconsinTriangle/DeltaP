@@ -1,4 +1,5 @@
 """Unit tests for configuration settings."""
+
 import pytest
 
 from config.settings import BotConfig, get_config
@@ -11,8 +12,8 @@ class TestBotConfig:
         """Test successful loading of configuration from environment."""
         config = BotConfig.load_from_env()
 
-        assert config.discord_token == 'test_token_123'
-        assert config.database_path == 'test_pledge_points.db'
+        assert config.discord_token == "test_token_123"
+        assert config.database_path == "test_pledge_points.db"
         assert config.points_channel_id == 123456789
         assert isinstance(config.deleted_messages_channel_id, int)
 
@@ -21,8 +22,8 @@ class TestBotConfig:
         import os
         from unittest.mock import patch
 
-        env = {'CSV_NAME': 'test.db', 'CHANNEL_ID': '123'}
-        with patch('config.settings.load_dotenv'):  # Don't load .env file
+        env = {"CSV_NAME": "test.db", "CHANNEL_ID": "123"}
+        with patch("config.settings.load_dotenv"):  # Don't load .env file
             with patch.dict(os.environ, env, clear=True):
                 with pytest.raises(ValueError, match="DISCORD_TOKEN not found"):
                     BotConfig.load_from_env()
@@ -32,8 +33,8 @@ class TestBotConfig:
         import os
         from unittest.mock import patch
 
-        env = {'DISCORD_TOKEN': 'token', 'CHANNEL_ID': '123'}
-        with patch('config.settings.load_dotenv'):  # Don't load .env file
+        env = {"DISCORD_TOKEN": "token", "CHANNEL_ID": "123"}
+        with patch("config.settings.load_dotenv"):  # Don't load .env file
             with patch.dict(os.environ, env, clear=True):
                 with pytest.raises(ValueError, match="CSV_NAME"):
                     BotConfig.load_from_env()
@@ -43,17 +44,17 @@ class TestBotConfig:
         import os
         from unittest.mock import patch
 
-        env = {'DISCORD_TOKEN': 'token', 'CSV_NAME': 'test.db'}
-        with patch('config.settings.load_dotenv'):  # Don't load .env file
+        env = {"DISCORD_TOKEN": "token", "CSV_NAME": "test.db"}
+        with patch("config.settings.load_dotenv"):  # Don't load .env file
             with patch.dict(os.environ, env, clear=True):
                 with pytest.raises(ValueError, match="CHANNEL_ID not found"):
                     BotConfig.load_from_env()
 
     def test_load_from_env_invalid_channel_id(self, monkeypatch):
         """Test that non-integer CHANNEL_ID raises ValueError."""
-        monkeypatch.setenv('DISCORD_TOKEN', 'token')
-        monkeypatch.setenv('CSV_NAME', 'test.db')
-        monkeypatch.setenv('CHANNEL_ID', 'not_a_number')
+        monkeypatch.setenv("DISCORD_TOKEN", "token")
+        monkeypatch.setenv("CSV_NAME", "test.db")
+        monkeypatch.setenv("CHANNEL_ID", "not_a_number")
 
         with pytest.raises(ValueError, match="CHANNEL_ID must be a valid integer"):
             BotConfig.load_from_env()
@@ -73,6 +74,7 @@ class TestGetConfig:
         """Test that get_config returns the same instance."""
         # Reset the global config
         import config.settings
+
         config.settings.config = None
 
         config1 = get_config()
@@ -84,6 +86,7 @@ class TestGetConfig:
         """Test that configuration is loaded only once."""
         # Reset the global config
         import config.settings
+
         config.settings.config = None
 
         # Get config multiple times

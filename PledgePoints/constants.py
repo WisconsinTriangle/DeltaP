@@ -28,7 +28,7 @@ VALID_PLEDGES: List[str] = [
     "Nick",
     "Tony",
     "Will",
-    "Devin"
+    "Devin",
 ]
 
 # Pledge name aliases and nicknames

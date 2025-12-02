@@ -35,7 +35,7 @@ class BotConfig:
     deleted_messages_channel_id: int
 
     @classmethod
-    def load_from_env(cls) -> 'BotConfig':
+    def load_from_env(cls) -> "BotConfig":
         """
         Load configuration from environment variables.
 
@@ -52,24 +52,26 @@ class BotConfig:
         load_dotenv()
 
         # Discord token
-        discord_token = os.getenv('DISCORD_TOKEN')
+        discord_token = os.getenv("DISCORD_TOKEN")
         if not discord_token:
             raise ValueError("DISCORD_TOKEN not found in .env file")
 
         # Database path (formerly CSV_NAME - misleading name kept for compatibility)
-        database_path = os.getenv('CSV_NAME')
+        database_path = os.getenv("CSV_NAME")
         if not database_path:
             raise ValueError("CSV_NAME (database path) not found in .env file")
 
         # Points channel ID
-        channel_id_str = os.getenv('CHANNEL_ID')
+        channel_id_str = os.getenv("CHANNEL_ID")
         if not channel_id_str:
             raise ValueError("CHANNEL_ID not found in .env file")
 
         try:
             points_channel_id = int(channel_id_str)
         except ValueError:
-            raise ValueError(f"CHANNEL_ID must be a valid integer, got {channel_id_str}")
+            raise ValueError(
+                f"CHANNEL_ID must be a valid integer, got {channel_id_str}"
+            )
 
         # Deleted messages channel ID (hardcoded value moved to config)
         # This channel ID was previously hardcoded in main.py
@@ -79,7 +81,7 @@ class BotConfig:
             discord_token=discord_token,
             database_path=database_path,
             points_channel_id=points_channel_id,
-            deleted_messages_channel_id=deleted_messages_channel_id
+            deleted_messages_channel_id=deleted_messages_channel_id,
         )
 
 

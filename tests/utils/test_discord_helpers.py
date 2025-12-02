@@ -1,4 +1,5 @@
 """Unit tests for Discord helper utilities."""
+
 from datetime import datetime
 
 import pytest
@@ -33,7 +34,9 @@ class TestSendChunkedMessage:
         """Test that long messages are split into chunks."""
         long_message = "A" * 2500  # Exceeds default chunk size of 1900
 
-        await send_chunked_message(mock_discord_interaction, long_message, chunk_size=1000)
+        await send_chunked_message(
+            mock_discord_interaction, long_message, chunk_size=1000
+        )
 
         # Should be called 3 times (2500 chars / 1000 chunk_size = 3 chunks)
         assert mock_discord_interaction.followup.send.call_count == 3

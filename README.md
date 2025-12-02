@@ -4,7 +4,7 @@ A Discord bot for managing and tracking pledge points in a fraternity/organizati
 
 [![Tests](https://github.com/warnervance/DeltaP/actions/workflows/tests.yml/badge.svg)](https://github.com/warnervance/DeltaP/actions/workflows/tests.yml)
 [![Python 3.13+](https://img.shields.io/badge/python-3.13+-blue.svg)](https://www.python.org/downloads/)
-[![Code Coverage](https://img.shields.io/badge/coverage-31%25-orange.svg)](htmlcov/index.html)
+[![Code Coverage](https://img.shields.io/badge/coverage-96%25-brightgreen.svg)](htmlcov/index.html)
 
 ## Features
 

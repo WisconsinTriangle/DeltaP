@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  deltap-bot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: deltap-discord-bot
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      # Mount data directory for SQLite database persistence
+      - ./data:/app/data
+    environment:
+      # Override CSV_NAME path to use data directory
+      - CSV_NAME=/app/data/pledge_points.db
+    # Optional: Add logging configuration
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"

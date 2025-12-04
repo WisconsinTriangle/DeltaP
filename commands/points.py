@@ -19,6 +19,7 @@ from utils.discord_helpers import (
     format_rankings_text,
     format_pending_points_list,
     format_approval_confirmation,
+    format_pending_reset_confirmation,
 )
 
 
@@ -346,6 +347,77 @@ def setup(bot: commands.Bot):
             else:
                 await interaction.followup.send(
                     f"An error occurred while approving points: {error_message}"
+                )
+            raise
+
+    @bot.tree.command(
+        name="reset_points_to_pending",
+        description="Move point submissions back to pending by ID",
+    )
+    async def reset_points_to_pending(interaction: discord.Interaction, point_ids: str):
+        """
+        Reset point submissions to pending status.
+
+        Allows E-Board members to move previously approved/rejected submissions
+        back into the pending queue for re-review.
+
+        Args:
+            interaction: Discord interaction from the slash command
+            point_ids: Comma-separated list of IDs (e.g., "1,2,3")
+        """
+        try:
+            from role.role_checking import check_eboard_role, check_info_systems_role
+
+            if not (
+                await check_eboard_role(interaction)
+                or await check_info_systems_role(interaction)
+            ):
+                await interaction.response.send_message(
+                    "You don't have permission to reset points. Executive Board role required.",
+                    ephemeral=True,
+                )
+                return
+
+            await interaction.response.send_message(
+                "Moving point submissions back to pending..."
+            )
+
+            try:
+                ids = [int(id.strip()) for id in point_ids.split(",") if id.strip()]
+            except ValueError:
+                await interaction.followup.send(
+                    "Invalid point IDs. Please provide a comma-separated list of numbers."
+                )
+                return
+
+            if not ids:
+                await interaction.followup.send(
+                    "No point IDs provided. Please supply at least one ID."
+                )
+                return
+
+            pending_entries = db_manager.reset_points_to_pending(ids)
+
+            if not pending_entries:
+                await interaction.followup.send(
+                    "No point entries were updated. Confirm the IDs and try again."
+                )
+                return
+
+            reset_text = format_pending_reset_confirmation(pending_entries)
+            await send_chunked_message(interaction, reset_text)
+        except Exception as e:
+            error_message = str(e)
+            if (
+                "Must be 2000 or fewer in length" in error_message
+                or "Invalid Form Body" in error_message
+            ):
+                await interaction.followup.send(
+                    "The reset message was too long to send. Please reset fewer points at a time or contact an admin."
+                )
+            else:
+                await interaction.followup.send(
+                    f"An error occurred while resetting points: {error_message}"
                 )
             raise
 

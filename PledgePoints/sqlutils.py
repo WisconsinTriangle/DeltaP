@@ -319,6 +319,61 @@ class DatabaseManager:
 
             return approved_entries
 
+    def reset_points_to_pending(self, point_ids: List[int]) -> List[PointEntry]:
+        """
+        Move specified point entries back to pending status.
+
+        Args:
+            point_ids (List[int]): List of point entry IDs to reset
+
+        Returns:
+            List[PointEntry]: List of entries moved back to pending
+        """
+        if not point_ids:
+            return []
+
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+
+            placeholders = ",".join("?" for _ in point_ids)
+            cursor.execute(
+                f"""
+                SELECT id, Time, PointChange, Pledge, Brother, Comment,
+                       approval_status, approved_by, approval_timestamp
+                FROM Points
+                WHERE id IN ({placeholders})
+            """,
+                point_ids,
+            )
+
+            rows = cursor.fetchall()
+            pending_entries = []
+            for row in rows:
+                try:
+                    entry = PointEntry.from_db_row(row)
+                    entry.approval_status = "pending"
+                    entry.approved_by = None
+                    entry.approval_timestamp = None
+                    pending_entries.append(entry)
+                except (ValueError, TypeError):
+                    continue
+
+            if not pending_entries:
+                return []
+
+            cursor.execute(
+                f"""
+                UPDATE Points
+                SET approval_status = 'pending',
+                    approved_by = NULL,
+                    approval_timestamp = NULL
+                WHERE id IN ({placeholders})
+            """,
+                point_ids,
+            )
+
+            return pending_entries
+
     def reject_points(self, point_ids: List[int], rejector: str) -> List[PointEntry]:
         """
         Reject specific point entries by their IDs.

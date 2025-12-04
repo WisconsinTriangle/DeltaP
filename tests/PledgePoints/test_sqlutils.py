@@ -458,6 +458,59 @@ class TestRejectPoints:
         assert len(approved) == 0
 
 
+class TestResetPointsToPending:
+    """Tests for resetting point entries back to pending."""
+
+    def test_reset_approved_entry(self, db_manager):
+        """Move an approved entry back to pending and clear approver metadata."""
+        entry = PointEntry(
+            time=datetime.now(),
+            point_change=10,
+            pledge="John",
+            brother="Mike",
+            comment="Great work",
+        )
+        db_manager.add_point_entries([entry])
+        pending = db_manager.get_pending_points()
+        point_id = pending[0].entry_id
+
+        db_manager.approve_points([point_id], "Admin")
+
+        reset_entries = db_manager.reset_points_to_pending([point_id])
+        assert len(reset_entries) == 1
+
+        retrieved = db_manager.get_point_by_id(point_id)
+        assert retrieved.approval_status == "pending"
+        assert retrieved.approved_by is None
+        assert retrieved.approval_timestamp is None
+
+    def test_reset_rejected_entry(self, db_manager):
+        """Move a rejected entry back to pending."""
+        entry = PointEntry(
+            time=datetime.now(),
+            point_change=5,
+            pledge="Jane",
+            brother="Tom",
+            comment="Needs another look",
+        )
+        db_manager.add_point_entries([entry])
+        pending = db_manager.get_pending_points()
+        point_id = pending[0].entry_id
+
+        db_manager.reject_points([point_id], "Admin")
+
+        reset_entries = db_manager.reset_points_to_pending([point_id])
+        assert len(reset_entries) == 1
+
+        retrieved = db_manager.get_point_by_id(point_id)
+        assert retrieved.approval_status == "pending"
+
+    def test_reset_empty_ids(self, db_manager):
+        """No-op when given an empty ID list."""
+        result = db_manager.reset_points_to_pending([])
+        assert result == []
+
+
 class TestConnectionManagement:
     """Tests for database connection management."""
 

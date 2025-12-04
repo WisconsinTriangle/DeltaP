@@ -177,3 +177,24 @@ def format_approval_confirmation(
         text += format_point_entry_summary(entry) + "\n"
 
     return text
+
+
+def format_pending_reset_confirmation(entries: List[PointEntry]) -> str:
+    """
+    Format a confirmation message for entries moved back to pending.
+
+    Args:
+        entries: List of point entries reset to pending
+
+    Returns:
+        str: Formatted confirmation message
+    """
+    if not entries:
+        return "No entries moved to pending."
+
+    text = f"♻️ **Moved {len(entries)} submission(s) back to pending:**\n\n"
+
+    for entry in entries:
+        text += format_point_entry_summary(entry) + "\n"
+
+    return text

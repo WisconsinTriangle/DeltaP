@@ -8,6 +8,7 @@ from unittest.mock import AsyncMock, Mock
 from utils.discord_helpers import (
     format_approval_status,
     format_approval_confirmation,
+    format_pending_reset_confirmation,
     format_pending_points_list,
     format_point_entry_detailed,
     format_point_entry_summary,
@@ -248,3 +249,40 @@ class TestFormatApprovalConfirmation:
 
         assert "❌" in result
         assert "Rejected" in result
+
+
+class TestFormatPendingResetConfirmation:
+    """Tests for format_pending_reset_confirmation function."""
+
+    def test_reset_confirmation(self):
+        """Test formatting when entries are moved back to pending."""
+        entries = [
+            PointEntry(
+                entry_id=3,
+                time=datetime.now(),
+                brother="Sam",
+                point_change=7,
+                pledge="Alex",
+                comment="Recheck this",
+            ),
+            PointEntry(
+                entry_id=4,
+                time=datetime.now(),
+                brother="Luke",
+                point_change=5,
+                pledge="Pat",
+                comment="Needs review",
+            ),
+        ]
+
+        result = format_pending_reset_confirmation(entries)
+
+        assert "Moved 2 submission(s)" in result
+        assert "ID 3" in result
+        assert "ID 4" in result
+
+    def test_empty_reset_confirmation(self):
+        """Test handling of empty entry list."""
+        result = format_pending_reset_confirmation([])
+
+        assert "No entries moved to pending" in result

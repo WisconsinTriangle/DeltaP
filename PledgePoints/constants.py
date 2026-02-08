@@ -17,18 +17,13 @@ from typing import Dict, List
 # Valid pledge names for the current semester
 # Update this list at the start of each semester
 VALID_PLEDGES: List[str] = [
-    "Evan",
-    "Felix",
-    "George",
-    "Henrik",
-    "Kashyap",
-    "Krishiv",
-    "Logan",
-    "Milo",
-    "Nick",
-    "Tony",
-    "Will",
-    "Devin",
+    "Ollie",
+    "Caden",
+    "Scout",
+    "Elliot",
+    "Ethan",
+    "Hayden",
+    "Charlie"
 ]
 
 # Pledge name aliases and nicknames

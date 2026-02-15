@@ -30,6 +30,8 @@ VALID_PLEDGES: List[str] = [
 # Maps common nicknames or alternate spellings to official pledge names
 PLEDGE_ALIASES: Dict[str, str] = {
     # Add more aliases as needed
+    "Eliot": "Elliot",
+    "Elliott": "Elliot"
 }
 
 # =============================================================================

@@ -64,9 +64,9 @@ class TestValidatePledgeName:
         """Test validation of valid pledge names."""
         # This test depends on VALID_PLEDGES constant
         # Assuming "Logan" is a valid pledge
-        result = validate_pledge_name("logan")
+        result = validate_pledge_name("elliott")
         assert result is not None
-        assert result == "Logan"
+        assert result == "Elliot"
 
     def test_invalid_pledge_name(self):
         """Test validation of invalid pledge names."""

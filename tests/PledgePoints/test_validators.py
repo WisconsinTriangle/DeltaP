@@ -86,11 +86,11 @@ class TestParsePointMessage:
 
     def test_valid_positive_points(self):
         """Test parsing valid positive point messages."""
-        result = parse_point_message("+10 Eli Great job at recruitment")
+        result = parse_point_message("+10 Elliot Great job at recruitment")
         if result:  # Only test if Eli is a valid pledge
             point_change, pledge, comment = result
             assert point_change == 10
-            assert pledge == "Eli"
+            assert pledge == "Elliot"
             assert comment == "Great job at recruitment"
 
     def test_valid_negative_points(self):

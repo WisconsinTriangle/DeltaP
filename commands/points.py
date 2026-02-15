@@ -132,6 +132,11 @@ def setup(bot: commands.Bot):
 
             # Get pledge points and rankings using database manager
             points = get_pledge_points(db_manager)
+
+            if points.empty:
+                await interaction.followup.send("No pledge data found in the database.")
+                return
+
             rankings_df = rank_pledges(points)
 
             # Filter to only include current pledges from VALID_PLEDGES
@@ -186,6 +191,11 @@ def setup(bot: commands.Bot):
 
             # Get pledge points and rankings using database manager
             points = get_pledge_points(db_manager)
+
+            if points.empty:
+                await interaction.followup.send("No pledge data found in the database.")
+                return
+
             rankings_df = rank_pledges(points)
 
             # Filter to only include current pledges from VALID_PLEDGES

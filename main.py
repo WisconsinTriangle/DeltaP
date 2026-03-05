@@ -1,7 +1,7 @@
 # Imports
 import asyncio  # Asynchronous I/O support
 import ssl  # Secure connection support
-from datetime import datetime, timedelta  # Date and time handling
+from datetime import datetime  # Date and time handling
 
 import aiohttp  # Add this import at the top with other imports
 import discord
@@ -38,50 +38,6 @@ bot.http.get_session = get_session  # type: ignore
 # Add start_time attribute to bot
 setattr(bot, "start_time", None)
 
-AUTISMBOARD_CHANNEL_ID = 1447396336428384256
-
-
-async def export_channel_to_markdown(channel: discord.TextChannel, months: int = 2) -> None:
-    """Fetch messages from the past `months` months and save to a markdown file."""
-    after_date = datetime.now(pytz.UTC) - timedelta(days=months * 30)
-    messages = []
-
-    print(f"Fetching messages from #{channel.name} since {after_date.date()}...")
-    async for message in channel.history(limit=None, after=after_date, oldest_first=True):
-        messages.append(message)
-
-    print(f"Fetched {len(messages)} messages from #{channel.name}")
-
-    filename = f"{channel.name}_export.md"
-    with open(filename, "w", encoding="utf-8") as f:
-        f.write(f"# #{channel.name} — Message Export\n\n")
-        f.write(f"Exported: {datetime.now(pytz.UTC).strftime('%Y-%m-%d %H:%M UTC')}\n")
-        f.write(f"Period: {after_date.strftime('%Y-%m-%d')} to {datetime.now(pytz.UTC).strftime('%Y-%m-%d')}\n")
-        f.write(f"Total messages: {len(messages)}\n\n---\n\n")
-
-        current_date = None
-        for msg in messages:
-            msg_date = msg.created_at.strftime("%Y-%m-%d")
-            if msg_date != current_date:
-                current_date = msg_date
-                f.write(f"## {msg_date}\n\n")
-
-            timestamp = msg.created_at.strftime("%H:%M")
-            author = msg.author.display_name
-            content = msg.content if msg.content else ""
-
-            f.write(f"**{author}** ({timestamp})\n")
-            if content:
-                f.write(f"{content}\n")
-            if msg.attachments:
-                for att in msg.attachments:
-                    f.write(f"[Attachment: {att.filename}]({att.url})\n")
-            if msg.embeds:
-                f.write(f"*[{len(msg.embeds)} embed(s)]*\n")
-            f.write("\n")
-
-    print(f"Saved {len(messages)} messages to {filename}")
-
 
 @bot.event
 async def on_ready():
@@ -97,13 +53,6 @@ async def on_ready():
         print(f"Guild: {guild.name} (ID: {guild.id})")
         for channel in guild.channels:
             print(f"  #{channel.name} (ID: {channel.id}, Type: {channel.type})")
-
-    # Export autismboard messages to markdown
-    autismboard = bot.get_channel(AUTISMBOARD_CHANNEL_ID)
-    if autismboard:
-        await export_channel_to_markdown(autismboard)
-    else:
-        print(f"Could not find autismboard channel (ID: {AUTISMBOARD_CHANNEL_ID})")
 
     try:
         # Set up command modules

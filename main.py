@@ -48,6 +48,12 @@ async def on_ready():
         bot.start_time = datetime.now(pytz.UTC)
         print(f"Start time set to: {bot.start_time}")
 
+    # Print all channel IDs
+    for guild in bot.guilds:
+        print(f"Guild: {guild.name} (ID: {guild.id})")
+        for channel in guild.channels:
+            print(f"  #{channel.name} (ID: {channel.id}, Type: {channel.type})")
+
     try:
         # Set up command modules
         setup_admin(bot)

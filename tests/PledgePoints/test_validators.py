@@ -14,13 +14,13 @@ class TestValidatePointChange:
 
     def test_valid_positive_points(self):
         """Test validation of valid positive points."""
-        assert validate_point_change(10) is True
-        assert validate_point_change(100) is True
+        assert validate_point_change(4) is True
+        assert validate_point_change(3) is True
 
     def test_valid_negative_points(self):
         """Test validation of valid negative points."""
-        assert validate_point_change(-10) is True
-        assert validate_point_change(-100) is True
+        assert validate_point_change(-4) is True
+        assert validate_point_change(-3) is True
 
     def test_zero_points(self):
         """Test validation of zero points."""

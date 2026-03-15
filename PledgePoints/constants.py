@@ -54,9 +54,9 @@ REACTION_RATE_LIMIT_SECONDS = 0.2  # Minimum time between reactions
 # =============================================================================
 
 # SQL integer limits for point values
-# SQLite INTEGER type range
-SQL_INT_MIN = -9223372036854775808
-SQL_INT_MAX = 9223372036854775807
+
+SQL_INT_MIN = -5
+SQL_INT_MAX = 5
 
 # Point entry validation regex
 # Matches format: +10, -5, +100, +1.25, -2.5, etc.

@@ -18,7 +18,6 @@ from typing import Dict, List
 # Update this list at the start of each semester
 VALID_PLEDGES: List[str] = [
     "Ollie",
-    "Caden",
     "Scout",
     "Elliot",
     "Ethan",

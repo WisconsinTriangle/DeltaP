@@ -17,20 +17,33 @@ from typing import Dict, List
 # Valid pledge names for the current semester
 # Update this list at the start of each semester
 VALID_PLEDGES: List[str] = [
-    "Ollie",
-    "Scout",
-    "Elliot",
-    "Ethan",
-    "Hayden",
-    "Shaya"
+    "Jorge",
+    "Lucas",
+    "Luke",
+    "Xander",
+    "Mason",
+    "Samuel",
+    "Kabir",
+    "Suryat",
+    "Jack",
+    "Max",
+    "Tim",
+    "Jake",
+    "Neil M",
+    "Neil D",
+    "Ashwin",
+    "Nicholas",
+    "Kieran",
+    "Gabe",
+    "Torin",
 ]
 
 # Pledge name aliases and nicknames
 # Maps common nicknames or alternate spellings to official pledge names
 PLEDGE_ALIASES: Dict[str, str] = {
     # Add more aliases as needed
-    "Eliot": "Elliot",
-    "Elliott": "Elliot"
+    "Nick": "Nicholas",
+    "Sam": "Samuel",
 }
 
 # =============================================================================
